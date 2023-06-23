@@ -49,3 +49,16 @@ contract Foo {
 }
 
 ```
+
+# "msg" Variable
+
+```
+function method() {
+    msg.value; // Number of wei send
+    msg.sender; // Address of a sender of a transaction
+    msg.data; // Complete transaction data
+    msg.sig; // Function identifier
+}
+```
+
+// Available in a constructor and regular methods
