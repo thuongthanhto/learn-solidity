@@ -1,7 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-contract Crowdfunding {
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "./Utils.sol";
+
+contract Crowdfunding is Ownable {
+    using Utils for uint;
+
     enum State {
         Ongoing,
         Failed,
@@ -35,10 +40,12 @@ contract Crowdfunding {
         address payable beneficiaryAddress
     ) {
         name = contractName;
-        targetAmount = targetAmountEth * 1 ether;
-        fundingDeadline = currentTime() + durationInMin * 1 minutes;
+        targetAmount = targetAmountEth.etherToWei();
+        fundingDeadline = currentTime() + durationInMin.minutesToSeconds();
         beneficiary = beneficiaryAddress;
         state = State.Ongoing;
+
+        transferOwnership(beneficiary);
     }
 
     receive() external payable inState(State.Ongoing) {
@@ -48,6 +55,13 @@ contract Crowdfunding {
         if (totalCollected() >= targetAmount) {
             collected = true;
         }
+    }
+
+    function cancelCrowdFunding() public onlyOwner inState(State.Ongoing) onlyOwner {
+        require(beforeDeadline(), "Deadline has passed");
+
+        state = State.Failed;
+        emit CampaignFinished(address(this), totalCollected(), false);
     }
 
     function finishCrowdFunding() public inState(State.Ongoing) {

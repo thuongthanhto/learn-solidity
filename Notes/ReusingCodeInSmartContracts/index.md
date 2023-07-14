@@ -176,5 +176,130 @@ contract Ownable {
 # Create NPM package
 npm init -y
 # Install Solidity library
-npm install @openzepplin/contracts
+npm install @openzeppelin/contracts
+```
+
+## Library in Solidity
+
+So far were putting all logic into contracts
+
+Licraries - another option for code reuse
+
+- Libraries can't have state
+- A collection of functions
+
+### Library Example
+
+```Solidity
+library Utils {
+    function maxOf(uint a, uint b) internal returns(uint) {
+        if (a > b) return a;
+        else return b;
+    }
+}
+```
+
+### Using Library
+
+```Solidity
+import "./Utils.sol";
+
+contract Foo {
+    function method() public view returns(uint) {
+        return Utils.maxOf(5, 6);
+    }
+}
+```
+
+### Attaching Functions
+
+```Solidity
+library NumLib {
+    function nagative(int self) internal return(int) {
+        return -self;
+    }
+}
+```
+
+```Solidity
+import "./NumLib.sol";
+
+contract Foo {
+    using NumLib for int;
+    function method(int value) return(int) {
+        value.negative();
+        true.negative(); // Won't work
+    }
+}
+```
+
+## Linked Libirary 
+
+### Library Development
+
+Two development options for libraries
+
+- Library embedded in a smart contract
+- Library deployed separately
+
+Visibility modifier defines a deployment option
+
+### Library Deployment Options
+
+```Solidity
+// Library is part of another contract
+library NumLib {
+    // All functions should have the "internal" modifier
+    function negative(uint self) internal returns(uint) {...}
+}
+
+// Library is deployed separtely 
+library NumLib {
+    function negative(uint self) public return(uint) {...}
+}
+```
+
+In a library we can only use either "internal" or "public" visibility modifiers
+
+### Deployable Libraries
+
+Other type of a smart contract
+
+Has no storage (no state variables)
+
+Accessible for everyone to call
+
+Allow to save gas
+
+### Library Linking
+
+Library should have just one instance
+
+- No state
+- Cannot be changed
+
+Truffle can "link" a library with a smart contract
+
+- Embeds a library address into the bycode
+
+### Linking a Library with Truffle
+
+```Solidity
+const Utils = artifacts.require("./Utils.sol");
+const Contract = artifacts.require("./Contract.sol");
+
+module.exports = async function(deployer) {
+    await deployer.deploy(Utils);
+    await deployer.link(Utils, Contract);
+}
+```
+
+```Solidity
+const Utils = artifacts.require("./Utils.sol");
+const Contract = artifacts.require("./Contract.sol");
+
+module.exports = async function(deployer) {
+    const utilsInstance = await Utils.at("<address>")
+    await deployer.link(utilsInstance, Contract);
+}
 ```
