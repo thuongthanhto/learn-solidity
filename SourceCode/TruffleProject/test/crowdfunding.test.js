@@ -77,10 +77,24 @@ contract('Crowdfunding', function (accounts) {
 
       expect.fail('Should revert transaction');
     } catch (error) {
-      expect(error.message).to.include(
-        'Deadline has not passed'
-      );
+      expect(error.message).to.include('Deadline has not passed');
     }
+  });
+
+  it('emits an event when a campaign is finished', async function () {
+    await increaseTime(601);
+    await mineBlock();
+
+    const receipt = await crowdfunding.finishCrowdFunding();
+    expect(receipt.logs).to.have.lengthOf(1);
+
+    const campaignFinishedEvent = receipt.logs[0];
+    expect(campaignFinishedEvent.event).to.equal('CampaignFinished');
+
+    const eventArgs = campaignFinishedEvent.args;
+    expect(eventArgs.addr).to.equal(crowdfunding.address);
+    expect(eventArgs.totalCollected.toString()).to.equal('0');
+    expect(eventArgs.succeeded).to.equal(false);
   });
 
   it('allows to collect money from the campaign', async function () {
@@ -89,31 +103,34 @@ contract('Crowdfunding', function (accounts) {
     await increaseTime(601);
     await mineBlock();
 
-    await crowdfunding.finishCrowdFunding({ from: accounts[0] });
+    await crowdfunding.finishCrowdFunding();
 
     const initAmount = await web3.eth.getBalance(beneficiary);
     await crowdfunding.collect({ from: accounts[1] });
 
     const newBalance = await web3.eth.getBalance(beneficiary);
-    expect(newBalance - initAmount).toString().to.equal(ONE_ETH);
+    expect((newBalance - initAmount).toString()).to.equal(ONE_ETH);
 
     const fundingState = await crowdfunding.state();
-    expect(fundingState.toString().to.equal(PAID_OUT_STATE));
+    expect(fundingState.toString()).to.equal(PAID_OUT_STATE);
   });
 
   it('allows to withdraw money from the campaign', async function () {
-    await crowdfunding.sendTransaction({ value: ONE_ETH - 100, from: accounts[1] });
+    await crowdfunding.sendTransaction({
+      value: ONE_ETH - 100,
+      from: accounts[1],
+    });
 
     await increaseTime(601);
     await mineBlock();
 
     await crowdfunding.finishCrowdFunding();
     const fundingState = await crowdfunding.state();
-    expect(fundingState.toString().to.equal(FAILED_STATE));
+    expect(fundingState.toString()).to.equal(FAILED_STATE);
 
     await crowdfunding.withdraw({ from: accounts[1] });
     const amount = await crowdfunding.amounts(accounts[1]);
-    expect(amount.toString().to.equal('0'));
+    expect(amount.toString()).to.equal('0');
   });
 
   async function increaseTime(increaseBySec) {

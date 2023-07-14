@@ -376,3 +376,167 @@ Contracts can interact with other
 - Call methods
 
 Opens possibilities for emergent interactions
+
+## Calling Other Contract
+
+```Solidity
+import "./ShopItem.sol"
+
+contract OnlineShop {
+    address itemAddr = 0xEb1...374;
+
+    function  sellItem() {
+        ShopItem shopItem = ShopItem(itemAddr);
+        itemAddr.startSelling();
+    }
+}
+
+```
+
+## Creating Contract Instance
+
+```Solidity
+import "./ShopItem.sol";
+
+contract OnlineShop {
+    function sellItem(string name, uint price) {
+        ShopItem shopItem = new ShopItem(name, price);
+        itemAddr.startSelling();
+    }
+}
+```
+
+## Try/Catch
+
+try/catch statements
+
+- Solidity > 0.6.0
+
+Similar try/catch in other languages
+
+Has some limitations
+
+- Only works for external calls or contract creations
+- Supports limited error types
+
+```Solidity
+function handleError() returns(uint value) {
+    try contract.getValue() return (uint v) {
+        // Error didn't occur
+        return v;
+    } catch {
+        // Error occured
+        return 0;
+    }
+}
+```
+
+### Contract Creation
+
+ ```Solidity
+ function tryCreate() public {
+    try new Foo() returns (Foo foo) {
+        foo.setValue(1);
+    } catch {
+        // Handle error
+    }
+ }
+ ```
+
+### Catch Statements
+
+```Solidity
+// Error from revert("str") or require("str")
+catch Error(string memory reason) {...}
+// Error from assert()
+catch Panic(uint errorCode) {...}
+// Any other error
+catch (bytes memory lowLevelData) {...}
+// Any error
+catch {...}
+```
+
+### Combine Catch Statements
+
+```Solidity
+try contract.getValue() return (uint v) {
+    return v;
+} catch Error(string errorMessage) {
+    ...
+} catch {
+    ...
+}
+```
+
+# Events
+
+Allow nofitying about a new event
+
+- Clients can subscribe to events
+- Stored in the transaction log
+- Contracts cannot subscribe to events
+
+Permanently persistent
+
+- Cheaper than storing in memory
+
+## Event Example
+
+```Solidity
+event ItemForSale (
+    uint id,
+    uint price
+)
+
+function saleItem(uint id, uint price) public  {
+    emit ItemForSale(1, 4000);
+}
+```
+
+### Subscribing to Events - web3js
+
+```JavaScript
+contract.events.ItemForSale (
+    {
+        fromBlock: 0,
+        toBlock: 'lastest'
+    },
+    function(error, event) {
+        console.log(event);
+    }
+)
+```
+
+### Indexed Attributes
+
+Allows to filter by a particular attribute
+
+- Indexed attributes
+- Use "indexed" keyword
+
+### Indexed Events
+
+```Solidity
+event ItemForSale (
+    uint id,
+    uint price,
+    uint indexed type,
+)
+
+function saleItem(uint id, uint price) public  {
+    emit ItemForSale(1, 4000, 0);
+}
+```
+
+```JavaScript
+contract.events.ItemForSale (
+    {
+        filter: { type: [0, 1] }
+        fromBlock: 0,
+        toBlock: 'lastest'
+    },
+    function(error, event) {
+        console.log(event);
+    }
+)
+```

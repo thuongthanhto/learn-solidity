@@ -9,6 +9,12 @@ contract Crowdfunding {
         PaidOut
     }
 
+    event CampaignFinished(
+        address addr,
+        uint totalCollected,
+        bool succeeded
+    );
+
     string public name;
     uint public targetAmount;
     uint public fundingDeadline;
@@ -52,6 +58,8 @@ contract Crowdfunding {
         } else {
             state = State.Succeeded;
         }
+
+        emit CampaignFinished(address(this), totalCollected(), collected);
     }
 
     function collect() inState(State.Succeeded) public {
@@ -62,7 +70,7 @@ contract Crowdfunding {
         }
     }
 
-    function widthdraw() public inState(State.Failed) {
+    function withdraw() public inState(State.Failed) {
         require(amounts[msg.sender] > 0, "No funds for account");
         uint contributed = amounts[msg.sender];
         amounts[msg.sender] = 0;
