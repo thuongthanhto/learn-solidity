@@ -24,7 +24,7 @@ Get timestamp from a block
 
 # Get Current Time
 
-```
+```Solidity
 contract Foo {
     uint deadline = ...; // Time in seconds
     function checkTime() {
@@ -36,7 +36,7 @@ contract Foo {
 
 # Other Block Information
 
-```
+```Solidity
 function method() {
     block.timestamp; // Block timestamp
     block.gaslimit; // Gas limit
@@ -59,7 +59,7 @@ Can be manipulated to a certain degree
 
 # Time Units
 
-```
+```Solidity
 uint oneSecond = 1 seconds;
 uint oneHour = 60 minutes;
 uint oneWeek = 7 days;
@@ -73,7 +73,7 @@ function convertToSeconds(uint mins) return (uint) {
 
 # Ethereum Units
 
-```
+```Solidity
 uint v1 = 10 wei;
 uint v2 = 20 finney;
 uint v3 = 30 ether;
@@ -98,7 +98,7 @@ More readable and safe than using intergers
 
 # Defining Enums
 
-```
+```Solidity
 enum AuctionState {
     NotStarted,
     Ongoing,
@@ -121,7 +121,7 @@ Implement payments for our contract
 
 # Sending Payments
 
-```
+```Solidity
 address payable addr = ...;
 address payable addr = payable(anotherAddr);
 // Reverts execution if fails
@@ -159,7 +159,7 @@ A contract can inspect how much ether is sent
 
 # Accepting a Payment
 
-```
+```Solidity
 function buyGadgets(uint gadgetsNum) payable {
     // Check send amount
     require(msg.value > 1000);
@@ -169,7 +169,7 @@ function buyGadgets(uint gadgetsNum) payable {
 
 # Receive Function
 
-```
+```Solidity
 // Called when ether is sent without calling a method
 receive() external payable {
     // Implement extra logic when a payment received
@@ -180,7 +180,7 @@ receive() external payable {
 
 # Getting a Balance
 
-```
+```Solidity
 address addr = ...;
 // Get account balance in wei
 uint accountBalance = addr.balance;
@@ -199,7 +199,7 @@ Now has only one role
 
 - Only for handling unmatched function calls
 
-```
+```Solidity
 // Called when an undefined function is called
 fallback() external payable {
     ...
@@ -224,7 +224,7 @@ call() can be used as a workaground
 - Can be used to call arbitrary contract method
 - No limit on how much gas it can use
 
-```
+```Solidity
 address toAddr = ...;
 // Just transfer Ether
 (bool sent, bytes memory data) = toAddr.call{value: 1 ether}("");
@@ -251,7 +251,7 @@ User can contribute to a smart contract
 
 Users can withdraw Ether
 
-```
+```Solidity
 function withdraw() public {
     uint balance = getBalance(msg.sender);
     require(balance > 0);
@@ -262,7 +262,7 @@ function withdraw() public {
 
 # Defending Against Reentrancy Attack
 
-```
+```Solidity
 function withdraw() public {
     // Pre-conditions
     uint balance = getBalance(msg.sender);
@@ -301,7 +301,7 @@ Function modifiers allow extracting this code
 
 ## Checkes Duplication
 
-```
+```Solidity
 contract Foo {
     address owner;
 
@@ -320,7 +320,7 @@ contract Foo {
 
 ## Modifiers with Parameters
 
-```
+```Solidity
 contract Shop {
     address owner; address moderator;
     modifier onlyBy(address addr) {
@@ -335,7 +335,7 @@ contract Shop {
 
 ## Multiple Modifiers
 
-```
+```Solidity
 modifier isOwner {
     require(msg.sender == owner);
     _:
@@ -351,7 +351,7 @@ function stopGame() isOwner gameStarted {...}
 
 ## Convert Callback Into a Promise
 
-```
+```Solidity
 new Promise((resolve, reject) => {
     send({...},
         (error, result) => {
@@ -364,3 +364,15 @@ new Promise((resolve, reject) => {
         })
 })
 ```
+
+# Interaction Between Contracts
+
+Used smart contracts is isolation
+
+Contracts can interact with other
+
+- Deploy smart contracts
+- Send payments
+- Call methods
+
+Opens possibilities for emergent interactions

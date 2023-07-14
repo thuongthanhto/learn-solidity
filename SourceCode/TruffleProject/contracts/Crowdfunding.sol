@@ -54,6 +54,24 @@ contract Crowdfunding {
         }
     }
 
+    function collect() inState(State.Succeeded) public {
+        if (beneficiary.send(totalCollected())) {
+            state = State.PaidOut;
+        } else {
+            state = State.Failed;
+        }
+    }
+
+    function widthdraw() public inState(State.Failed) {
+        require(amounts[msg.sender] > 0, "No funds for account");
+        uint contributed = amounts[msg.sender];
+        amounts[msg.sender] = 0;
+
+        if (!payable(msg.sender).send(contributed)) {
+            amounts[msg.sender] = contributed;
+        }
+    }
+
     function beforeDeadline() public view returns (bool) {
         return currentTime() < fundingDeadline;
     }
